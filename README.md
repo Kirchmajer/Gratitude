@@ -61,13 +61,31 @@ If you prefer to run the server and client separately:
 
 ## Environment Variables
 
-The server requires the following environment variables in a `.env` file in the server directory:
+The server requires environment variables to be set in a `.env` file in the server directory. A sample file `.env.example` is provided as a template:
 
-```
-PORT=5000
-NODE_ENV=development
-OPENROUTER_API_KEY=your_openrouter_api_key
-```
+1. Copy the example file:
+   ```
+   cp server/.env.example server/.env
+   ```
+
+2. Edit the `.env` file and replace the placeholder values with your actual values:
+   ```
+   PORT=5000
+   NODE_ENV=development
+   OPENROUTER_API_KEY=your_actual_openrouter_api_key
+   ```
+
+3. You'll need to obtain an API key from [OpenRouter](https://openrouter.ai/) to use the LLM features.
+
+## Database Setup
+
+The application uses SQLite for data storage. The database file is automatically created when the server starts for the first time.
+
+- The database schema is defined in `server/db/init.sql`
+- The database file is stored in `server/db/data/gratitude.db`
+- The database file is excluded from version control via `.gitignore`
+
+When a new developer clones the repository, the database will be automatically initialized with the correct schema when they start the server for the first time.
 
 ## Usage
 
