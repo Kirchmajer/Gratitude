@@ -1,0 +1,136 @@
+.history-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.history-intro {
+  color: var(--text-light);
+  margin-bottom: var(--spacing-lg);
+}
+
+.entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  overflow-y: auto;
+}
+
+.entry-card {
+  background-color: var(--card-color);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  border-left: 4px solid var(--primary-color);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.entry-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.entry-date {
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.entry-tone {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  text-transform: capitalize;
+}
+
+.entry-tone.poetic {
+  background-color: var(--secondary-light);
+  color: var(--secondary-dark);
+}
+
+.entry-tone.conversational {
+  background-color: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.entry-content {
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.5;
+}
+
+.entry-original {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.entry-original span {
+  font-weight: 600;
+}
+
+.delete-button {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background-color: transparent;
+  color: var(--text-light);
+  padding: var(--spacing-xs);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.entry-card:hover .delete-button {
+  opacity: 1;
+}
+
+.delete-button:hover {
+  background-color: var(--error-color);
+  color: white;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: var(--spacing-md);
+}
+
+.loading-more {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-md);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: var(--spacing-xl);
+}
+
+.empty-state p {
+  color: var(--text-light);
+  max-width: 400px;
+}

@@ -1,0 +1,28 @@
+.app-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  background-color: var(--card-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: var(--spacing-sm);
+  }
+  
+  .main-content {
+    padding: var(--spacing-md);
+  }
+}
