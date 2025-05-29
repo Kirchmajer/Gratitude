@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGratitude } from '../contexts/GratitudeContext';
 import { formatDate } from '../utils/api';
 import LoadingSpinner from './LoadingSpinner';
@@ -6,11 +6,24 @@ import '../styles/HistorySection.css';
 
 const HistorySection = () => {
   const { entries, loading, error, fetchHistory, handleDeleteEntry } = useGratitude();
-
+  const [localError, setLocalError] = useState(null);
+  
+  // Only fetch history if we don't already have entries
   useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+    if (entries.length === 0 && !loading && !error) {
+      fetchHistory().catch(err => {
+        setLocalError('Failed to fetch gratitude history');
+      });
+    }
+  }, [entries.length, fetchHistory, loading, error]);
 
+  // Use a local error state that won't be cleared by the context
+  useEffect(() => {
+    if (error) {
+      setLocalError(error);
+    }
+  }, [error]);
+  
   if (loading && entries.length === 0) {
     return (
       <section className="history-section">
@@ -22,12 +35,20 @@ const HistorySection = () => {
     );
   }
 
-  if (error) {
+  if (localError && entries.length === 0) {
     return (
       <section className="history-section">
         <div className="error-message">
-          <p>{error}</p>
-          <button className="primary-button" onClick={fetchHistory}>
+          <p>{localError}</p>
+          <button 
+            className="primary-button" 
+            onClick={() => {
+              setLocalError(null);
+              fetchHistory().catch(err => {
+                setLocalError('Failed to fetch gratitude history');
+              });
+            }}
+          >
             Try Again
           </button>
         </div>

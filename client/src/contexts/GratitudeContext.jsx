@@ -26,18 +26,40 @@ export const GratitudeProvider = ({ children }) => {
     fetchHistory();
   }, []);
 
-  // Fetch gratitude history
+  // Track if a fetch is in progress to prevent duplicate calls
+  const [isFetching, setIsFetching] = useState(false);
+  
+  // Fetch gratitude history with debounce to prevent multiple simultaneous calls
   const fetchHistory = async () => {
+    // If already fetching, don't start another fetch
+    if (isFetching) return;
+    
     try {
+      setIsFetching(true);
       setLoading(true);
+      
       const data = await getHistory();
-      setEntries(data.entries);
-      setError(null);
+      
+      // Only update entries if we got valid data
+      if (data && data.entries) {
+        setEntries(data.entries);
+        // Only clear error if we successfully got entries
+        setError(null);
+      }
     } catch (err) {
-      setError('Failed to fetch gratitude history');
-      console.error(err);
+      console.error('Error fetching history:', err);
+      // Only set error if we don't have entries yet
+      if (entries.length === 0) {
+        setError('Failed to fetch gratitude history');
+      }
+      // Re-throw the error so it can be caught by the component
+      throw err;
     } finally {
       setLoading(false);
+      // Add a small delay before allowing another fetch
+      setTimeout(() => {
+        setIsFetching(false);
+      }, 1000);
     }
   };
 

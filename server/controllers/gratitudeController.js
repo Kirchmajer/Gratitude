@@ -73,10 +73,25 @@ class GratitudeController {
   static async getHistory(req, res) {
     try {
       const entries = await GratitudeModel.getAll();
+      
+      // Add a small delay to simulate network latency and prevent rapid re-fetching
+      // This helps prevent the flickering issue on the client side
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       res.json({ entries });
     } catch (error) {
       console.error('Error getting history:', error);
-      res.status(500).json({ error: 'Failed to get history' });
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
+      
+      // Send a more detailed error response
+      res.status(500).json({ 
+        error: 'Failed to get history',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      });
     }
   }
 

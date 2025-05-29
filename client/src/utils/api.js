@@ -28,13 +28,27 @@ export const saveEntry = async (content, originalInput, tone) => {
   }
 };
 
-// Get all gratitude entries
-export const getHistory = async () => {
+// Get all gratitude entries with retry logic
+export const getHistory = async (retryCount = 0) => {
   try {
     const response = await axios.get(`${API_URL}/history`);
     return response.data;
   } catch (error) {
     console.error('Error getting history:', error);
+    
+    // If we get a network error or 5xx server error and haven't retried too many times, retry
+    if ((error.code === 'ECONNABORTED' || 
+         (error.response && error.response.status >= 500)) && 
+        retryCount < 2) {
+      console.log(`Retrying history fetch (attempt ${retryCount + 1})...`);
+      
+      // Wait a bit before retrying (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+      
+      // Retry the request
+      return getHistory(retryCount + 1);
+    }
+    
     throw error;
   }
 };
