@@ -8,6 +8,7 @@ dotenv.config();
 
 // Import routes
 const gratitudeRoutes = require('./routes/gratitude');
+const testRoutes = require('./routes/test');
 
 // Initialize express app
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/gratitude', gratitudeRoutes);
+app.use('/api/gratitude/test', testRoutes);
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {

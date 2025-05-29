@@ -10,6 +10,7 @@
  * Available tests:
  * - Proxy Test: Verifies that the Vite proxy is correctly routing API requests
  * - Database Test: Verifies that entries can be saved to and retrieved from the database
+ * - API Test: Verifies the OpenRouter API connection, key validation, fallback mechanisms, and input processing
  */
 
 const { spawn } = require('child_process');
@@ -155,6 +156,12 @@ function startServers() {
     console.log(`${colors.fg.white}1. Click the ${colors.fg.cyan}"Database Test"${colors.fg.white} button in the test navigation${colors.reset}`);
     console.log(`${colors.fg.white}2. Click the ${colors.fg.green}"Test Database Save"${colors.fg.white} button to run the test${colors.reset}`);
     console.log(`${colors.fg.white}3. Check the results to see if database operations are working correctly${colors.reset}`);
+    console.log('\n');
+    
+    console.log(`${colors.bright}${colors.fg.blue}API Test:${colors.reset}`);
+    console.log(`${colors.fg.white}1. Click the ${colors.fg.cyan}"API Test"${colors.fg.white} button in the test navigation${colors.reset}`);
+    console.log(`${colors.fg.white}2. Click the ${colors.fg.green}"Test OpenRouter API"${colors.fg.white} button to run the test${colors.reset}`);
+    console.log(`${colors.fg.white}3. Check the results to see if the OpenRouter API integration is working correctly${colors.reset}`);
     console.log('\n');
     console.log(`${colors.fg.yellow}Press Ctrl+C to stop both servers when you're done testing${colors.reset}`);
     console.log('\n');

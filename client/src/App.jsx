@@ -5,11 +5,12 @@ import HistorySection from './components/HistorySection';
 import Header from './components/Header';
 import ProxyTest from './components/ProxyTest';
 import DatabaseTest from './components/DatabaseTest';
+import ApiTest from './components/ApiTest';
 import './styles/App.css';
 
 function App() {
   const [activeView, setActiveView] = useState('input'); // 'input', 'history', or 'test'
-  const [activeTest, setActiveTest] = useState('proxy'); // 'proxy' or 'database'
+  const [activeTest, setActiveTest] = useState('proxy'); // 'proxy', 'database', or 'api'
 
   return (
     <GratitudeProvider>
@@ -60,9 +61,24 @@ function App() {
                 >
                   Database Test
                 </button>
+                <button 
+                  onClick={() => setActiveTest('api')}
+                  style={{
+                    padding: '10px 15px',
+                    backgroundColor: activeTest === 'api' ? '#2196F3' : '#e0e0e0',
+                    color: activeTest === 'api' ? 'white' : 'black',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '16px'
+                  }}
+                >
+                  API Test
+                </button>
               </div>
               
-              {activeTest === 'proxy' ? <ProxyTest /> : <DatabaseTest />}
+              {activeTest === 'proxy' ? <ProxyTest /> : 
+               activeTest === 'database' ? <DatabaseTest /> : <ApiTest />}
             </div>
           ) : (
             <div>Error: Unknown view</div>
