@@ -4,10 +4,12 @@ import InputSection from './components/InputSection';
 import HistorySection from './components/HistorySection';
 import Header from './components/Header';
 import ProxyTest from './components/ProxyTest';
+import DatabaseTest from './components/DatabaseTest';
 import './styles/App.css';
 
 function App() {
   const [activeView, setActiveView] = useState('input'); // 'input', 'history', or 'test'
+  const [activeTest, setActiveTest] = useState('proxy'); // 'proxy' or 'database'
 
   return (
     <GratitudeProvider>
@@ -22,8 +24,48 @@ function App() {
             <InputSection />
           ) : activeView === 'history' ? (
             <HistorySection />
+          ) : activeView === 'test' ? (
+            <div>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                marginBottom: '20px',
+                gap: '10px'
+              }}>
+                <button 
+                  onClick={() => setActiveTest('proxy')}
+                  style={{
+                    padding: '10px 15px',
+                    backgroundColor: activeTest === 'proxy' ? '#2196F3' : '#e0e0e0',
+                    color: activeTest === 'proxy' ? 'white' : 'black',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '16px'
+                  }}
+                >
+                  Proxy Test
+                </button>
+                <button 
+                  onClick={() => setActiveTest('database')}
+                  style={{
+                    padding: '10px 15px',
+                    backgroundColor: activeTest === 'database' ? '#2196F3' : '#e0e0e0',
+                    color: activeTest === 'database' ? 'white' : 'black',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '16px'
+                  }}
+                >
+                  Database Test
+                </button>
+              </div>
+              
+              {activeTest === 'proxy' ? <ProxyTest /> : <DatabaseTest />}
+            </div>
           ) : (
-            <ProxyTest />
+            <div>Error: Unknown view</div>
           )}
         </main>
         

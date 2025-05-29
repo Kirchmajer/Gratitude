@@ -1,11 +1,15 @@
 /**
- * Test script to verify that the Vite proxy is correctly routing API requests
+ * Test script for the Gratitude App
  * 
  * This script:
  * 1. Starts the Express server
  * 2. Starts the Vite dev server
  * 3. Opens a browser to the Vite dev server
- * 4. Provides instructions for testing the proxy
+ * 4. Provides instructions for running the tests
+ * 
+ * Available tests:
+ * - Proxy Test: Verifies that the Vite proxy is correctly routing API requests
+ * - Database Test: Verifies that entries can be saved to and retrieved from the database
  */
 
 const { spawn } = require('child_process');
@@ -75,7 +79,7 @@ if (!fs.existsSync(envPath)) {
 }
 
 function startServers() {
-  console.log(`${colors.bright}${colors.fg.cyan}Starting proxy test...${colors.reset}`);
+  console.log(`${colors.bright}${colors.fg.cyan}Starting Gratitude App tests...${colors.reset}`);
   
   // Start the Express server
   console.log(`${colors.fg.green}Starting Express server...${colors.reset}`);
@@ -136,11 +140,21 @@ function startServers() {
   
   function showInstructions() {
     console.log('\n');
-    console.log(`${colors.bright}${colors.fg.magenta}=== PROXY TEST INSTRUCTIONS ===${colors.reset}`);
+    console.log(`${colors.bright}${colors.fg.magenta}=== GRATITUDE APP TEST INSTRUCTIONS ===${colors.reset}`);
     console.log(`${colors.fg.white}1. Open your browser to ${colors.fg.cyan}http://localhost:3000${colors.reset}`);
     console.log(`${colors.fg.white}2. Click the ${colors.fg.cyan}"Test Mode"${colors.fg.white} button in the bottom right corner${colors.reset}`);
-    console.log(`${colors.fg.white}3. Click the ${colors.fg.green}"Test Proxy"${colors.fg.white} button to run the test${colors.reset}`);
-    console.log(`${colors.fg.white}4. Check the results to see if the proxy is working correctly${colors.reset}`);
+    console.log('\n');
+    
+    console.log(`${colors.bright}${colors.fg.blue}Proxy Test:${colors.reset}`);
+    console.log(`${colors.fg.white}1. Ensure ${colors.fg.cyan}"Proxy Test"${colors.fg.white} is selected in the test navigation${colors.reset}`);
+    console.log(`${colors.fg.white}2. Click the ${colors.fg.green}"Test Proxy"${colors.fg.white} button to run the test${colors.reset}`);
+    console.log(`${colors.fg.white}3. Check the results to see if the proxy is working correctly${colors.reset}`);
+    console.log('\n');
+    
+    console.log(`${colors.bright}${colors.fg.blue}Database Test:${colors.reset}`);
+    console.log(`${colors.fg.white}1. Click the ${colors.fg.cyan}"Database Test"${colors.fg.white} button in the test navigation${colors.reset}`);
+    console.log(`${colors.fg.white}2. Click the ${colors.fg.green}"Test Database Save"${colors.fg.white} button to run the test${colors.reset}`);
+    console.log(`${colors.fg.white}3. Check the results to see if database operations are working correctly${colors.reset}`);
     console.log('\n');
     console.log(`${colors.fg.yellow}Press Ctrl+C to stop both servers when you're done testing${colors.reset}`);
     console.log('\n');
