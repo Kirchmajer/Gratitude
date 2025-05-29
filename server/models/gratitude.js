@@ -4,9 +4,12 @@ class GratitudeModel {
   // Create a new gratitude entry
   static async create(content, originalInput, tone) {
     try {
+      // Get current timestamp with timezone info
+      const now = new Date().toISOString();
+      
       const result = await runQuery(
-        'INSERT INTO gratitude_entries (content, original_input, tone) VALUES (?, ?, ?)',
-        [content, originalInput, tone]
+        'INSERT INTO gratitude_entries (content, original_input, tone, created_at) VALUES (?, ?, ?, ?)',
+        [content, originalInput, tone, now]
       );
       
       if (result.id) {

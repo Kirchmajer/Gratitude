@@ -64,14 +64,18 @@ export const deleteEntry = async (id) => {
   }
 };
 
-// Format date for display
+// Format date for display (date only, no time)
 export const formatDate = (dateString) => {
+  // Parse the ISO string into a Date object
+  const date = new Date(dateString);
+  
+  // Format options for Australian locale - date only, no time
   const options = { 
     year: 'numeric', 
     month: 'long', 
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    day: 'numeric'
   };
-  return new Date(dateString).toLocaleDateString(undefined, options);
+  
+  // Use Australian locale for proper formatting
+  return date.toLocaleString('en-AU', options);
 };

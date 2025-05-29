@@ -21,6 +21,7 @@
   background-color: var(--card-color);
   border-radius: var(--border-radius-md);
   padding: var(--spacing-md);
+  padding-right: calc(var(--spacing-md) + 30px); /* Reserve space for delete button */
   box-shadow: var(--shadow-sm);
   position: relative;
   border-left: 4px solid var(--primary-color);
@@ -34,7 +35,7 @@
 
 .entry-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   margin-bottom: var(--spacing-sm);
 }
@@ -42,26 +43,9 @@
 .entry-date {
   font-size: 0.9rem;
   color: var(--text-light);
+  font-weight: 500;
 }
 
-.entry-tone {
-  font-size: 0.8rem;
-  padding: 2px 8px;
-  border-radius: var(--border-radius-sm);
-  background-color: var(--primary-light);
-  color: var(--primary-dark);
-  text-transform: capitalize;
-}
-
-.entry-tone.poetic {
-  background-color: var(--secondary-light);
-  color: var(--secondary-dark);
-}
-
-.entry-tone.conversational {
-  background-color: var(--accent-light);
-  color: var(--accent-dark);
-}
 
 .entry-content {
   font-size: 1.1rem;
@@ -69,21 +53,10 @@
   line-height: 1.5;
 }
 
-.entry-original {
-  font-size: 0.9rem;
-  color: var(--text-light);
-  margin-top: var(--spacing-sm);
-  padding-top: var(--spacing-sm);
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.entry-original span {
-  font-weight: 600;
-}
 
 .delete-button {
   position: absolute;
-  top: var(--spacing-sm);
+  top: var(--spacing-md);
   right: var(--spacing-sm);
   background-color: transparent;
   color: var(--text-light);
@@ -94,6 +67,8 @@
   justify-content: center;
   opacity: 0;
   transition: opacity var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+  width: 28px;
+  height: 28px;
 }
 
 .entry-card:hover .delete-button {

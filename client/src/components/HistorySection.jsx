@@ -80,16 +80,9 @@ const HistorySection = () => {
           <div key={entry.id} className="entry-card">
             <div className="entry-header">
               <span className="entry-date">{formatDate(entry.created_at)}</span>
-              <span className={`entry-tone ${entry.tone}`}>{entry.tone}</span>
             </div>
             
             <p className="entry-content">{entry.content}</p>
-            
-            {entry.original_input !== entry.content && (
-              <p className="entry-original">
-                <span>Original thought:</span> {entry.original_input}
-              </p>
-            )}
             
             <button 
               className="delete-button" 
