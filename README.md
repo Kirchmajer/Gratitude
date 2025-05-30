@@ -109,6 +109,34 @@ The application uses SQLite for data storage. The database file is automatically
 
 When a new developer clones the repository, the database will be automatically initialized with the correct schema when they start the server for the first time.
 
+## LLM Integration Architecture
+
+The application uses a modular approach to integrate with Large Language Models:
+
+### Centralized Prompts
+
+All prompts used for LLM interactions are centralized in `server/utils/prompts.js`. This ensures:
+
+- Consistency between the main application and testing components
+- Single source of truth for prompt engineering
+- Easier maintenance and updates to prompts
+
+### Centralized LLM Configuration
+
+LLM configuration parameters are centralized in `server/utils/llmConfig.js`, including:
+
+- Token limits for different prompt types
+- Temperature settings for different use cases
+- Default model selection
+- API endpoint configuration
+- Header configuration
+
+This architecture makes it easy to:
+- Adjust token limits for different prompt types
+- Fine-tune temperature settings for different use cases
+- Switch between different LLM providers or models
+- Maintain consistency between the main application and testing components
+
 ## Usage
 
 1. **New Entry**: Enter what you're grateful for (from a single word to a full sentence)
@@ -116,6 +144,7 @@ When a new developer clones the repository, the database will be automatically i
 3. **Choose a Suggestion**: Select from three refined gratitude statements
 4. **View History**: Switch to the History tab to see all your saved entries
 5. **Delete Entries**: Remove any entries you no longer want to keep
+6. **Test Mode**: Access testing tools via the "Test Mode" button in the bottom right corner
 
 ## Project Structure
 
@@ -137,4 +166,6 @@ gratitude-app/
 │   ├── routes/             # API routes
 │   ├── services/           # Business logic
 │   └── utils/              # Utility functions
+│       ├── prompts.js      # Centralized LLM prompts
+│       └── llmConfig.js    # LLM configuration parameters
 └── package.json            # Root package.json for running both client and server

@@ -198,28 +198,66 @@ This schema stores gratitude entries with the following fields:
 
 ### OpenRouter API Integration
 
-The OpenRouter API is integrated through the LLMService in `server/services/llmService.js`:
+The OpenRouter API integration has been refactored to use a modular, centralized approach:
+
+#### Centralized LLM Configuration
+
+All LLM configuration parameters are centralized in `server/utils/llmConfig.js`:
 
 ```javascript
-// OpenRouter API configuration
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-
-// Default headers for OpenRouter
-const headers = {
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-  'HTTP-Referer': 'https://gratitude-app.com',
-  'X-Title': 'Gratitude App'
+const llmConfig = {
+  // Default model to use
+  DEFAULT_MODEL: process.env.LLM_MODEL || 'google/gemini-2.0-flash-exp:free',
+  
+  // OpenRouter API URL
+  OPENROUTER_URL: 'https://openrouter.ai/api/v1/chat/completions',
+  
+  // Token limits for different prompt types
+  tokenLimits: {
+    analyzeGratitudeInput: 500,
+    generateTargetedQuestion: 500,
+    generateGratitudeStatements: 500,
+    apiValidation: 10
+  },
+  
+  // Temperature settings for different prompt types
+  temperatures: {
+    analyzeGratitudeInput: 0.3,
+    generateTargetedQuestion: 0.7,
+    generateGratitudeStatements: 0.7,
+    apiValidation: 0.3
+  },
+  
+  // Default headers for OpenRouter
+  getHeaders: (apiKey) => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${apiKey}`,
+    'HTTP-Referer': 'https://gratitude-app.com',
+    'X-Title': 'Gratitude App'
+  })
 };
 ```
 
-The service includes fallback mechanisms to handle cases where the API is unavailable:
+#### Centralized Prompts
+
+All prompts used for LLM interactions are centralized in `server/utils/prompts.js`:
+
+```javascript
+const prompts = {
+  analyzeGratitudeInput: (input) => `...`,
+  generateTargetedQuestion: (input, needsBeneficialAction, needsPositiveImpact) => `...`,
+  generateGratitudeStatements: (input) => `...`
+};
+```
+
+This architecture ensures consistency between the main application and testing components, making it easier to maintain and update prompts and LLM configuration parameters.
+
+The service still includes fallback mechanisms to handle cases where the API is unavailable:
 
 ```javascript
 // If API call fails, use fallback logic
 catch (error) {
   console.error('API error, using fallback:', error.message);
-  return wordCount >= 5 ? { complete: true } : { complete: false };
+  return this.getFallbackAnalysis(input);
 }
 ```

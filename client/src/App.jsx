@@ -6,11 +6,14 @@ import Header from './components/Header';
 import ProxyTest from './components/ProxyTest';
 import DatabaseTest from './components/DatabaseTest';
 import ApiTest from './components/ApiTest';
+import TestTargetedQuestion from './components/TestTargetedQuestion';
+import TestGratitudeStatements from './components/TestGratitudeStatements';
+import TestInputAnalysis from './components/TestInputAnalysis';
 import './styles/App.css';
 
 function App() {
   const [activeView, setActiveView] = useState('input'); // 'input', 'history', or 'test'
-  const [activeTest, setActiveTest] = useState('proxy'); // 'proxy', 'database', or 'api'
+  const [activeTest, setActiveTest] = useState('proxy'); // 'proxy', 'database', 'api', 'targeted-question', 'gratitude-statements', or 'input-analysis'
 
   return (
     <GratitudeProvider>
@@ -31,7 +34,8 @@ function App() {
                 display: 'flex', 
                 justifyContent: 'center', 
                 marginBottom: '20px',
-                gap: '10px'
+                gap: '10px',
+                flexWrap: 'wrap'
               }}>
                 <button 
                   onClick={() => setActiveTest('proxy')}
@@ -75,10 +79,56 @@ function App() {
                 >
                   API Test
                 </button>
+                <button 
+                  onClick={() => setActiveTest('targeted-question')}
+                  style={{
+                    padding: '10px 15px',
+                    backgroundColor: activeTest === 'targeted-question' ? '#2196F3' : '#e0e0e0',
+                    color: activeTest === 'targeted-question' ? 'white' : 'black',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '16px'
+                  }}
+                >
+                  Targeted Question Test
+                </button>
+                <button 
+                  onClick={() => setActiveTest('gratitude-statements')}
+                  style={{
+                    padding: '10px 15px',
+                    backgroundColor: activeTest === 'gratitude-statements' ? '#2196F3' : '#e0e0e0',
+                    color: activeTest === 'gratitude-statements' ? 'white' : 'black',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '16px'
+                  }}
+                >
+                  Gratitude Statements Test
+                </button>
+                <button 
+                  onClick={() => setActiveTest('input-analysis')}
+                  style={{
+                    padding: '10px 15px',
+                    backgroundColor: activeTest === 'input-analysis' ? '#2196F3' : '#e0e0e0',
+                    color: activeTest === 'input-analysis' ? 'white' : 'black',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '16px'
+                  }}
+                >
+                  Input Analysis Test
+                </button>
               </div>
               
               {activeTest === 'proxy' ? <ProxyTest /> : 
-               activeTest === 'database' ? <DatabaseTest /> : <ApiTest />}
+               activeTest === 'database' ? <DatabaseTest /> : 
+               activeTest === 'api' ? <ApiTest /> :
+               activeTest === 'targeted-question' ? <TestTargetedQuestion /> :
+               activeTest === 'gratitude-statements' ? <TestGratitudeStatements /> :
+               <TestInputAnalysis />}
             </div>
           ) : (
             <div>Error: Unknown view</div>

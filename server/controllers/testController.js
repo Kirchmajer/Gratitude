@@ -1,13 +1,15 @@
 const LLMService = require('../services/llmService');
 const axios = require('axios');
 const dotenv = require('dotenv');
+const prompts = require('../utils/prompts');
+const llmConfig = require('../utils/llmConfig');
 
 dotenv.config();
 
 // OpenRouter API configuration
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const DEFAULT_MODEL = process.env.LLM_MODEL || 'google/gemini-2.0-flash-exp:free';
+const OPENROUTER_URL = llmConfig.OPENROUTER_URL;
+const DEFAULT_MODEL = llmConfig.DEFAULT_MODEL;
 
 // Controller for testing OpenRouter API functionality
 class TestController {
@@ -112,15 +114,10 @@ class TestController {
       const response = await axios.post(OPENROUTER_URL, {
         model: DEFAULT_MODEL,
         messages: [{ role: "user", content: "Hello, this is a test message to verify the API key." }],
-        temperature: 0.3,
-        max_tokens: 10,
+        temperature: llmConfig.temperatures.apiValidation,
+        max_tokens: llmConfig.tokenLimits.apiValidation,
       }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-          'HTTP-Referer': 'https://gratitude-app.com',
-          'X-Title': 'Gratitude App'
-        }
+        headers: llmConfig.getHeaders(OPENROUTER_API_KEY)
       });
       
       res.json({
@@ -274,6 +271,333 @@ class TestController {
       res.json({
         success: false,
         message: 'Failed to test fallback mechanism',
+        error: {
+          message: error.message,
+          stack: error.stack
+        }
+      });
+    }
+  }
+
+  // Test the targeted question generation logic
+  static async testTargetedQuestion(req, res) {
+    try {
+      const { input, customPrompt, skipAnalysis } = req.body;
+      
+      if (!input) {
+        return res.status(400).json({ error: 'Input is required' });
+      }
+      
+      // First analyze the input to determine what's missing
+      let analysisResult;
+      if (!skipAnalysis) {
+        analysisResult = await LLMService.analyzeGratitudeInput(input);
+      } else {
+        // Use a mock analysis result if skipAnalysis is true
+        analysisResult = {
+          status: "needs_more_details",
+          has_past_tense: true,
+          has_reflective_style: true,
+          omits_explicit_gratitude: true,
+          has_beneficial_action: false,
+          has_positive_impact: false,
+          is_concise: true,
+          has_moderate_emotion: true,
+          missing_elements: ["beneficial action", "positive impact"]
+        };
+      }
+      
+      const needsBeneficialAction = !analysisResult.has_beneficial_action;
+      const needsPositiveImpact = !analysisResult.has_positive_impact;
+      const defaultPrompt = prompts.generateTargetedQuestion(input, needsBeneficialAction, needsPositiveImpact);
+      
+      // Use the custom prompt if provided
+      const promptToUse = customPrompt || defaultPrompt;
+      
+      // Make the API call directly to expose the full process
+      let question;
+      let rawResponse;
+      let error;
+      
+      try {
+        const response = await axios.post(OPENROUTER_URL, {
+          model: DEFAULT_MODEL,
+          messages: [{ role: "user", content: promptToUse }],
+          temperature: llmConfig.temperatures.generateTargetedQuestion,
+          max_tokens: llmConfig.tokenLimits.generateTargetedQuestion,
+        }, {
+          headers: llmConfig.getHeaders(OPENROUTER_API_KEY)
+        });
+        
+        rawResponse = response.data;
+        question = response.data.choices[0].message.content.trim();
+      } catch (apiError) {
+        error = {
+          message: apiError.message,
+          status: apiError.response ? apiError.response.status : null,
+          data: apiError.response ? apiError.response.data : null
+        };
+        
+        // Use fallback if API call fails
+        question = LLMService.getFallbackTargetedQuestion(
+          input, 
+          !analysisResult.has_beneficial_action, 
+          !analysisResult.has_positive_impact
+        );
+      }
+      
+      // Also get the question using the standard method for comparison
+      const standardQuestion = await LLMService.generateTargetedQuestion(input, analysisResult);
+      
+      res.json({
+        success: true,
+        input,
+        analysis: analysisResult,
+        prompt: {
+          default: defaultPrompt,
+          used: promptToUse
+        },
+        question: {
+          direct: question,
+          standard: standardQuestion
+        },
+        rawResponse,
+        error
+      });
+    } catch (error) {
+      console.error('Error testing targeted question generation:', error);
+      
+      res.json({
+        success: false,
+        message: 'Failed to test targeted question generation',
+        error: {
+          message: error.message,
+          stack: error.stack
+        }
+      });
+    }
+  }
+
+  // Test input analysis
+  static async testInputAnalysis(req, res) {
+    try {
+      const { input, customPrompt } = req.body;
+      
+      if (!input) {
+        return res.status(400).json({ error: 'Input is required' });
+      }
+      
+      // Get the internal prompt used for input analysis
+      const defaultPrompt = prompts.analyzeGratitudeInput(input);
+      
+      // Use the custom prompt if provided
+      const promptToUse = customPrompt || defaultPrompt;
+      
+      // Make the API call directly to expose the full process
+      let analysis;
+      let rawResponse;
+      let error;
+      
+      try {
+        const response = await axios.post(OPENROUTER_URL, {
+          model: DEFAULT_MODEL,
+          messages: [{ role: "user", content: promptToUse }],
+          temperature: llmConfig.temperatures.analyzeGratitudeInput,
+          max_tokens: llmConfig.tokenLimits.analyzeGratitudeInput,
+          ...(DEFAULT_MODEL.includes('openai') ? { response_format: { type: "json_object" } } : {})
+        }, {
+          headers: llmConfig.getHeaders(OPENROUTER_API_KEY)
+        });
+        
+        rawResponse = response.data;
+        const content = response.data.choices[0].message.content.trim();
+        
+        // Try to extract JSON from the response
+        let jsonStr = content;
+        
+        // If the response contains a JSON object within markdown code blocks, extract it
+        const jsonMatch = content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+        if (jsonMatch && jsonMatch[1]) {
+          jsonStr = jsonMatch[1];
+        }
+        
+        // If the response starts with text before the JSON, try to find the JSON part
+        if (!jsonStr.startsWith('{')) {
+          const jsonStartIndex = jsonStr.indexOf('{');
+          if (jsonStartIndex !== -1) {
+            jsonStr = jsonStr.substring(jsonStartIndex);
+            // Find the matching closing bracket
+            let bracketCount = 0;
+            let endIndex = -1;
+            for (let i = 0; i < jsonStr.length; i++) {
+              if (jsonStr[i] === '{') bracketCount++;
+              if (jsonStr[i] === '}') bracketCount--;
+              if (bracketCount === 0) {
+                endIndex = i + 1;
+                break;
+              }
+            }
+            if (endIndex !== -1) {
+              jsonStr = jsonStr.substring(0, endIndex);
+            }
+          }
+        }
+        
+        analysis = JSON.parse(jsonStr);
+      } catch (apiError) {
+        error = {
+          message: apiError.message,
+          status: apiError.response ? apiError.response.status : null,
+          data: apiError.response ? apiError.response.data : null
+        };
+        
+        // Use fallback if API call fails
+        analysis = LLMService.getFallbackAnalysis(input);
+      }
+      
+      // Also get the analysis using the standard method for comparison
+      const standardAnalysis = await LLMService.analyzeGratitudeInput(input);
+      
+      // Get the legacy analysis for comparison
+      const legacyAnalysis = await LLMService.analyzeInput(input);
+      
+      res.json({
+        success: true,
+        input,
+        prompt: {
+          default: defaultPrompt,
+          used: promptToUse
+        },
+        analysis: {
+          direct: analysis,
+          standard: standardAnalysis,
+          legacy: legacyAnalysis
+        },
+        rawResponse,
+        error
+      });
+    } catch (error) {
+      console.error('Error testing input analysis:', error);
+      
+      res.json({
+        success: false,
+        message: 'Failed to test input analysis',
+        error: {
+          message: error.message,
+          stack: error.stack
+        }
+      });
+    }
+  }
+
+  // Test gratitude statement generation
+  static async testGratitudeStatements(req, res) {
+    try {
+      const { input, customPrompt } = req.body;
+      
+      if (!input) {
+        return res.status(400).json({ error: 'Input is required' });
+      }
+      
+      // Get the internal prompt used for statement generation
+      const defaultPrompt = prompts.generateGratitudeStatements(input);
+      
+      // Use the custom prompt if provided
+      const promptToUse = customPrompt || defaultPrompt;
+      
+      // Make the API call directly to expose the full process
+      let statements;
+      let rawResponse;
+      let error;
+      
+      try {
+        const response = await axios.post(OPENROUTER_URL, {
+          model: DEFAULT_MODEL,
+          messages: [{ role: "user", content: promptToUse }],
+          temperature: llmConfig.temperatures.generateGratitudeStatements,
+          max_tokens: llmConfig.tokenLimits.generateGratitudeStatements,
+          ...(DEFAULT_MODEL.includes('openai') ? { response_format: { type: "json_object" } } : {})
+        }, {
+          headers: llmConfig.getHeaders(OPENROUTER_API_KEY)
+        });
+        
+        rawResponse = response.data;
+        const content = response.data.choices[0].message.content.trim();
+        
+        // Try to extract JSON from the response
+        let jsonStr = content;
+        
+        // If the response contains a JSON array within markdown code blocks, extract it
+        const jsonMatch = content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/);
+        if (jsonMatch && jsonMatch[1]) {
+          jsonStr = jsonMatch[1];
+        }
+        
+        // If the response starts with text before the JSON, try to find the JSON part
+        if (!jsonStr.startsWith('[')) {
+          const jsonStartIndex = jsonStr.indexOf('[');
+          if (jsonStartIndex !== -1) {
+            jsonStr = jsonStr.substring(jsonStartIndex);
+            // Find the matching closing bracket
+            let bracketCount = 0;
+            let endIndex = -1;
+            for (let i = 0; i < jsonStr.length; i++) {
+              if (jsonStr[i] === '[') bracketCount++;
+              if (jsonStr[i] === ']') bracketCount--;
+              if (bracketCount === 0) {
+                endIndex = i + 1;
+                break;
+              }
+            }
+            if (endIndex !== -1) {
+              jsonStr = jsonStr.substring(0, endIndex);
+            }
+          }
+        }
+        
+        statements = JSON.parse(jsonStr);
+        
+        // Ensure we have at least 3 statements
+        if (!Array.isArray(statements) || statements.length < 3) {
+          const fallbacks = LLMService.getFallbackGratitudeStatements(input);
+          statements = Array.isArray(statements) ? 
+            [...statements, ...fallbacks].slice(0, 3) : 
+            fallbacks;
+        }
+      } catch (apiError) {
+        error = {
+          message: apiError.message,
+          status: apiError.response ? apiError.response.status : null,
+          data: apiError.response ? apiError.response.data : null
+        };
+        
+        // Use fallback if API call fails
+        statements = LLMService.getFallbackGratitudeStatements(input);
+      }
+      
+      // Also get the statements using the standard method for comparison
+      const standardStatements = await LLMService.generateGratitudeStatements(input);
+      
+      res.json({
+        success: true,
+        input,
+        prompt: {
+          default: defaultPrompt,
+          used: promptToUse
+        },
+        statements: {
+          direct: statements,
+          standard: standardStatements
+        },
+        rawResponse,
+        error
+      });
+    } catch (error) {
+      console.error('Error testing gratitude statement generation:', error);
+      
+      res.json({
+        success: false,
+        message: 'Failed to test gratitude statement generation',
         error: {
           message: error.message,
           stack: error.stack

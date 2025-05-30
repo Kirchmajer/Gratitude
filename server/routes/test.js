@@ -12,6 +12,15 @@ router.get('/api-key', TestController.testApiKey);
 // Test fallback mechanisms
 router.post('/fallback', TestController.testFallback);
 
+// Test input analysis
+router.post('/input-analysis', TestController.testInputAnalysis);
+
+// Test targeted question generation
+router.post('/targeted-question', TestController.testTargetedQuestion);
+
+// Test gratitude statement generation
+router.post('/gratitude-statements', TestController.testGratitudeStatements);
+
 // Test processing different input types
 router.post('/process-input', TestController.testProcessInput);
 

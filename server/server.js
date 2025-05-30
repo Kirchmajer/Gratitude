@@ -20,7 +20,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/gratitude', gratitudeRoutes);
-app.use('/api/gratitude/test', testRoutes);
+app.use('/api/test', testRoutes);
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
