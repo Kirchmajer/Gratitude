@@ -26,6 +26,14 @@ textarea {
   box-shadow: var(--shadow-sm);
 }
 
+.character-count {
+  text-align: right;
+  color: var(--text-light);
+  font-size: 0.85rem;
+  margin-top: -10px;
+  margin-bottom: var(--spacing-sm);
+}
+
 .button-container {
   display: flex;
   justify-content: flex-end;
@@ -33,8 +41,8 @@ textarea {
   margin-top: var(--spacing-md);
 }
 
-/* Questions container */
-.questions-container {
+/* Question container */
+.question-container {
   display: flex;
   flex-direction: column;
 }
@@ -65,39 +73,26 @@ textarea {
   color: var(--primary-dark);
 }
 
-.other-questions {
-  margin-top: var(--spacing-md);
-}
-
-.other-questions h3 {
-  font-size: 1rem;
-  margin-bottom: var(--spacing-sm);
+.question-iteration {
+  font-size: 0.85rem;
   color: var(--text-light);
+  margin-bottom: var(--spacing-md);
 }
 
-.other-questions ul {
-  list-style-position: inside;
-  color: var(--text-light);
-}
-
-.other-questions li {
-  margin-bottom: var(--spacing-sm);
-}
-
-/* Suggestions container */
-.suggestions-container {
+/* Polishing container */
+.polishing-container {
   display: flex;
   flex-direction: column;
 }
 
-.suggestions-list {
+.statements-list {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
 }
 
-.suggestion-card {
+.statement-card {
   background-color: var(--card-color);
   border-radius: var(--border-radius-md);
   padding: var(--spacing-md);
@@ -108,37 +103,78 @@ textarea {
   border: 2px solid transparent;
 }
 
-.suggestion-card:hover {
+.statement-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   border-color: var(--primary-light);
 }
 
-.suggestion-text {
+.statement-text {
   font-size: 1.1rem;
   margin-bottom: var(--spacing-sm);
+  padding-right: 80px; /* Space for the select button */
 }
 
-.suggestion-tone {
+.select-button {
   position: absolute;
-  top: var(--spacing-sm);
-  right: var(--spacing-sm);
-  font-size: 0.8rem;
-  padding: 2px 8px;
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
   border-radius: var(--border-radius-sm);
+  padding: 4px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  opacity: 0;
+}
+
+.statement-card:hover .select-button {
+  opacity: 1;
+}
+
+.select-button:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
+/* Polished statement container */
+.polished-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.polished-statement-card {
   background-color: var(--primary-light);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--primary);
+}
+
+.polished-statement-text {
+  font-size: 1.2rem;
+  margin-bottom: var(--spacing-md);
+  line-height: 1.6;
   color: var(--primary-dark);
-  text-transform: capitalize;
 }
 
-.suggestion-tone.poetic {
-  background-color: var(--secondary-light);
-  color: var(--secondary-dark);
+/* Max iterations container */
+.max-iterations-container {
+  display: flex;
+  flex-direction: column;
 }
 
-.suggestion-tone.conversational {
-  background-color: var(--accent-light);
-  color: var(--accent-dark);
+.max-iterations-message {
+  background-color: var(--warning-light);
+  border-left: 4px solid var(--warning);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+  color: var(--warning-dark);
+  line-height: 1.5;
 }
 
 @media (max-width: 768px) {
@@ -148,5 +184,9 @@ textarea {
   
   .button-container button {
     width: 100%;
+  }
+  
+  .select-button {
+    opacity: 1;
   }
 }

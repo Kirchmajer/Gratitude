@@ -3,9 +3,13 @@ import axios from 'axios';
 const API_URL = '/api/gratitude';
 
 // Process user input
-export const processInput = async (input) => {
+export const processInput = async ({ input, questionIteration = 0, originalInput = null }) => {
   try {
-    const response = await axios.post(`${API_URL}/process`, { input });
+    const response = await axios.post(`${API_URL}/process`, { 
+      input,
+      questionIteration,
+      originalInput
+    });
     return response.data;
   } catch (error) {
     console.error('Error processing input:', error);

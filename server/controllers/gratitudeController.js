@@ -6,30 +6,55 @@ class GratitudeController {
   // Process user input
   static async processInput(req, res) {
     try {
-      const { input } = req.body;
+      const { 
+        input, 
+        questionIteration = 0, 
+        originalInput = null 
+      } = req.body;
       
       if (!input) {
         return res.status(400).json({ error: 'Input is required' });
       }
 
-      // Analyze if input is complete or just keywords
-      const analysis = await LLMService.analyzeInput(input);
+      // Analyze the gratitude input
+      const analysis = await LLMService.analyzeGratitudeInput(input);
+      console.log(`Input analysis status: ${analysis.status}, iteration: ${questionIteration}`);
       
-      if (!analysis.complete) {
-        // If input is incomplete, generate clarifying questions
-        const questions = await LLMService.generateQuestions(input);
-        return res.json({ needsMore: true, questions, originalInput: input });
-      } else {
-        // If input is complete, generate refined sentences
-        const suggestions = await LLMService.generateSentences(input);
-        return res.json({ 
-          needsMore: false, 
-          suggestions: [
-            { text: suggestions.concise, tone: 'concise' },
-            { text: suggestions.poetic, tone: 'poetic' },
-            { text: suggestions.conversational, tone: 'conversational' }
-          ],
-          originalInput: input
+      // Handle based on analysis result and iteration count
+      if (analysis.status === "polished") {
+        // If the input is already a polished statement of gratitude, return it directly
+        return res.json({
+          status: "polished",
+          statement: input,
+          originalInput: originalInput || input
+        });
+      } else if (analysis.status === "needs_polishing") {
+        // If the input needs polishing, generate refined statements
+        const statements = await LLMService.generateGratitudeStatements(input);
+        return res.json({
+          status: "needs_polishing",
+          statements,
+          originalInput: originalInput || input,
+          analysis
+        });
+      } else if (analysis.status === "needs_more_details") {
+        // Check if we've reached the maximum number of iterations
+        if (questionIteration >= 3) {
+          return res.json({
+            status: "max_iterations",
+            message: "We've tried a few questions, but it seems like we need more information. Please take a moment to think about a specific gratitude experience and start over.",
+            originalInput: originalInput || input
+          });
+        }
+        
+        // Generate a targeted question based on what's missing
+        const question = await LLMService.generateTargetedQuestion(input, analysis);
+        return res.json({
+          status: "needs_more_details",
+          question,
+          questionIteration,
+          originalInput: originalInput || input,
+          analysis
         });
       }
     } catch (error) {

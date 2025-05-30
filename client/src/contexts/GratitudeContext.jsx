@@ -14,12 +14,17 @@ export const GratitudeProvider = ({ children }) => {
   const [error, setError] = useState(null);
   
   // State for input process
-  const [inputState, setInputState] = useState('initial'); // 'initial', 'questions', 'suggestions'
+  // 'initial', 'question', 'polishing', 'polished', 'max_iterations'
+  const [inputState, setInputState] = useState('initial'); 
   const [userInput, setUserInput] = useState('');
-  const [questions, setQuestions] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
-  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
+  const [question, setQuestion] = useState('');
+  const [statements, setStatements] = useState([]);
+  const [polishedStatement, setPolishedStatement] = useState('');
+  const [selectedStatement, setSelectedStatement] = useState(null);
   const [originalInput, setOriginalInput] = useState('');
+  const [questionIteration, setQuestionIteration] = useState(0);
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [maxIterationsMessage, setMaxIterationsMessage] = useState('');
 
   // Fetch history on component mount
   useEffect(() => {
@@ -64,25 +69,44 @@ export const GratitudeProvider = ({ children }) => {
   };
 
   // Process user input
-  const handleProcessInput = async (input) => {
+  const handleProcessInput = async (input, iteration = 0, originalInputText = null) => {
     if (!input.trim()) return;
     
     try {
       setLoading(true);
       setUserInput(input);
       
-      const response = await processInput(input);
+      const response = await processInput({
+        input, 
+        questionIteration: iteration,
+        originalInput: originalInputText
+      });
       
-      if (response.needsMore) {
-        // If input needs more elaboration, show questions
-        setQuestions(response.questions);
+      console.log('Process input response:', response);
+      
+      if (response.status === "needs_more_details") {
+        // If input needs more details, show the targeted question
+        setQuestion(response.question);
         setOriginalInput(response.originalInput);
-        setInputState('questions');
-      } else {
-        // If input is complete, show suggestions
-        setSuggestions(response.suggestions);
+        setQuestionIteration(response.questionIteration);
+        setAnalysisResult(response.analysis);
+        setInputState('question');
+      } else if (response.status === "needs_polishing") {
+        // If input needs polishing, show statement options
+        setStatements(response.statements);
         setOriginalInput(response.originalInput);
-        setInputState('suggestions');
+        setAnalysisResult(response.analysis);
+        setInputState('polishing');
+      } else if (response.status === "polished") {
+        // If input is already polished, show it directly
+        setPolishedStatement(response.statement);
+        setOriginalInput(response.originalInput);
+        setInputState('polished');
+      } else if (response.status === "max_iterations") {
+        // If we've reached max iterations, show message
+        setMaxIterationsMessage(response.message);
+        setOriginalInput(response.originalInput);
+        setInputState('max_iterations');
       }
       
       setError(null);
@@ -96,18 +120,25 @@ export const GratitudeProvider = ({ children }) => {
 
   // Handle user's answer to a clarifying question
   const handleQuestionAnswer = async (answer) => {
+    // Increment iteration counter
+    const newIteration = questionIteration + 1;
+    setQuestionIteration(newIteration);
+    
     // Combine original input with the answer
     const combinedInput = `${originalInput} - ${answer}`;
-    await handleProcessInput(combinedInput);
+    
+    // Process with iteration count
+    await handleProcessInput(combinedInput, newIteration, originalInput);
   };
 
-  // Save selected gratitude entry
-  const handleSaveEntry = async (suggestion) => {
+  // Save selected gratitude statement
+  const handleSaveEntry = async (statement) => {
     try {
       setLoading(true);
-      setSelectedSuggestion(suggestion);
+      setSelectedStatement(statement);
       
-      await saveEntry(suggestion.text, originalInput, suggestion.tone);
+      // Save without a tone since we're not using tones anymore
+      await saveEntry(statement, originalInput, null);
       
       // Reset input state
       resetInputState();
@@ -146,10 +177,14 @@ export const GratitudeProvider = ({ children }) => {
   const resetInputState = () => {
     setInputState('initial');
     setUserInput('');
-    setQuestions([]);
-    setSuggestions([]);
-    setSelectedSuggestion(null);
+    setQuestion('');
+    setStatements([]);
+    setPolishedStatement('');
+    setSelectedStatement(null);
     setOriginalInput('');
+    setQuestionIteration(0);
+    setAnalysisResult(null);
+    setMaxIterationsMessage('');
   };
 
   // Context value
@@ -159,9 +194,13 @@ export const GratitudeProvider = ({ children }) => {
     error,
     inputState,
     userInput,
-    questions,
-    suggestions,
-    selectedSuggestion,
+    question,
+    statements,
+    polishedStatement,
+    selectedStatement,
+    questionIteration,
+    analysisResult,
+    maxIterationsMessage,
     handleProcessInput,
     handleQuestionAnswer,
     handleSaveEntry,
