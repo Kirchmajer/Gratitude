@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGratitude } from '../contexts/GratitudeContext';
 import LoadingSpinner from './LoadingSpinner';
 import '../styles/InputSection.css';
@@ -22,6 +22,7 @@ const InputSection = () => {
 
   const [input, setInput] = useState('');
   const [answer, setAnswer] = useState('');
+  const [customStatement, setCustomStatement] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -98,6 +99,18 @@ const InputSection = () => {
     </div>
   );
 
+  // Set the custom statement to the first suggestion when statements change
+  useEffect(() => {
+    if (statements.length > 0 && inputState === 'polishing') {
+      setCustomStatement(statements[0]);
+    }
+  }, [statements, inputState]);
+
+  const handleCustomStatementSubmit = (e) => {
+    e.preventDefault();
+    handleStatementSelect(customStatement);
+  };
+
   const renderPolishingOptions = () => (
     <div className="polishing-container">
       <h2>Choose your statement of gratitude</h2>
@@ -114,6 +127,28 @@ const InputSection = () => {
             <button className="select-button">Select</button>
           </div>
         ))}
+      </div>
+      
+      <div className="custom-statement-container">
+        <h3>Or write your own:</h3>
+        <form onSubmit={handleCustomStatementSubmit}>
+          <textarea
+            value={customStatement}
+            onChange={(e) => setCustomStatement(e.target.value)}
+            placeholder="Edit this statement or write your own..."
+            rows={4}
+            maxLength={250}
+            required
+          />
+          <div className="character-count">
+            {customStatement.length}/250 characters
+          </div>
+          <div className="button-container">
+            <button type="submit" className="primary-button" disabled={loading || !customStatement.trim()}>
+              {loading ? <LoadingSpinner size="small" /> : 'Save Custom Statement'}
+            </button>
+          </div>
+        </form>
       </div>
       
       <div className="button-container">

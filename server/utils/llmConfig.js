@@ -21,7 +21,7 @@ const llmConfig = {
     generateTargetedQuestion: 500,
     
     // Statement generation needs more tokens to generate multiple statements
-    generateGratitudeStatements: 500,
+    generateGratitudeStatements: 1000,
     
     // Simple API validation needs minimal tokens
     apiValidation: 10

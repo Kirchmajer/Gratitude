@@ -509,6 +509,7 @@ class TestController {
       let statements;
       let rawResponse;
       let error;
+      let extractionMethod;
       
       try {
         const response = await axios.post(OPENROUTER_URL, {
@@ -564,6 +565,9 @@ class TestController {
             [...statements, ...fallbacks].slice(0, 3) : 
             fallbacks;
         }
+        
+        // Set extraction method
+        extractionMethod = "JSON parsing";
       } catch (apiError) {
         error = {
           message: apiError.message,
@@ -571,8 +575,71 @@ class TestController {
           data: apiError.response ? apiError.response.data : null
         };
         
-        // Use fallback if API call fails
+        // Try to extract statements manually before falling back
+        try {
+          if (apiError.response && apiError.response.data && apiError.response.data.choices) {
+            const content = apiError.response.data.choices[0].message.content.trim();
+            
+            // Try different extraction methods
+            const statements = [];
+            
+            // Approach 1: Look for quoted strings that might be statements
+            const quoteRegex = /"([^"]+)"/g;
+            let quoteMatch;
+            
+            while ((quoteMatch = quoteRegex.exec(content)) !== null && statements.length < 3) {
+              if (quoteMatch[1].length > 10) { // Only consider strings that are long enough to be statements
+                statements.push(quoteMatch[1]);
+              }
+            }
+            
+            if (statements.length > 0) {
+              extractionMethod = "Manual extraction - quoted strings";
+              statements = statements.slice(0, 3);
+            } else {
+              // Approach 2: Look for numbered lists (1. Statement)
+              const numberedRegex = /\d+\.\s*([^.!?]+[.!?])/g;
+              let numberedMatch;
+              
+              while ((numberedMatch = numberedRegex.exec(content)) !== null && statements.length < 3) {
+                if (numberedMatch[1].trim().length > 10) {
+                  statements.push(numberedMatch[1].trim());
+                }
+              }
+              
+              if (statements.length > 0) {
+                extractionMethod = "Manual extraction - numbered list";
+                statements = statements.slice(0, 3);
+              } else {
+                // Approach 3: Look for sentences that might be statements
+                const sentences = content.split(/[.!?]+/)
+                  .map(s => s.trim())
+                  .filter(s => s.length > 15 && s.length < 150 && !s.startsWith('```') && !s.includes('statement'));
+                
+                if (sentences.length > 0) {
+                  extractionMethod = "Manual extraction - sentences";
+                  statements = sentences.slice(0, 3);
+                } else {
+                  // Approach 4: Try to extract paragraphs
+                  const paragraphs = content.split('\n\n')
+                    .map(p => p.trim())
+                    .filter(p => p.length > 20 && p.length < 200 && !p.startsWith('```'));
+                  
+                  if (paragraphs.length > 0) {
+                    extractionMethod = "Manual extraction - paragraphs";
+                    statements = paragraphs.slice(0, 3);
+                  }
+                }
+              }
+            }
+          }
+        } catch (extractionError) {
+          console.error('Error during manual extraction:', extractionError);
+        }
+        
+        // Use fallback if API call fails and manual extraction fails
         statements = LLMService.getFallbackGratitudeStatements(input);
+        extractionMethod = "Fallback statements";
       }
       
       // Also get the statements using the standard method for comparison
@@ -589,6 +656,7 @@ class TestController {
           direct: statements,
           standard: standardStatements
         },
+        extractionMethod,
         rawResponse,
         error
       });

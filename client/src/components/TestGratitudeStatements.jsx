@@ -88,6 +88,11 @@ const TestGratitudeStatements = () => {
                     </div>
                   ))}
                 </div>
+                {result.extractionMethod && (
+                  <div className="extraction-method">
+                    <p><strong>Extraction Method:</strong> {result.extractionMethod}</p>
+                  </div>
+                )}
               </div>
               
               <div className="statements-group">

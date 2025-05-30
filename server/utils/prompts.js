@@ -20,7 +20,7 @@ const prompts = {
     1. The entire statement must be composed in the past tense.
     2. The statement must be reflective in nature, akin to a personal journal entry or a quiet contemplation. It must not be directly addressed to any specific person or entity (i.e., avoid using "you" or similar direct address pronouns). The gratitude is implicitly for the writer's own reflection or for a general, passive audience.
     3. The statement must deliberately omit any explicit phrases that directly state gratitude, such as "I appreciated," "I'm grateful for," "Thank you," "I was thankful for," or similar constructions. The feeling of gratitude should be implied by the positive impact described.
-    4. The statement must describe a specific past action, quality, or situation that was beneficial or positive for the writer. This description should then be followed by a clear articulation of the resulting positive emotion or impact experienced by the writer. The beneficial action/quality should inherently convey why gratitude would be felt. The emotion/impact word should describe the writer's personal feeling or state.
+    4. The statement must describe a specific past action, quality, possession or situation that was beneficial or positive for the writer. This description should then be followed by a clear articulation of the resulting positive emotion or impact experienced by the writer. The beneficial action/quality should inherently convey why gratitude would be felt. The emotion/impact word should describe the writer's personal feeling or state.
     6. The statement must be clear and concise, avoiding verbose explanations, unnecessary jargon, or repetitive phrasing. Get straight to the point.
     7. The statement must avoid over-accentuating feelings. Use balanced and natural language to describe emotions, steering clear of overly dramatic, intense, or exaggerated emotional descriptors.
 
@@ -52,7 +52,7 @@ const prompts = {
     
     "${input}"
 
-    It appears there's an opportunity to explore a bit more about: ${needsBeneficialAction ? 'a specific past action, quality, or situation that was helpful or positive for you' : ''}${(needsBeneficialAction && needsPositiveImpact) ? ' and ' : ''}${needsPositiveImpact ? 'how that experience made you feel or what positive impact it had on you' : ''}.
+    It appears there's an opportunity to explore a bit more about: ${needsBeneficialAction ? 'a specific past action, quality, possession, or situation that was helpful or positive for you' : ''}${(needsBeneficialAction && needsPositiveImpact) ? ' and ' : ''}${needsPositiveImpact ? 'how that experience made you feel or what positive impact it had on you' : ''}.
 
     To help you articulate your gratitude more fully, please offer ONE gentle, open-ended question. This question should encourage reflection and help them uncover the missing detail(s) in a thoughtful way.
 
@@ -73,11 +73,11 @@ const prompts = {
       1. The entire statement must be composed in the past tense.
       2. The statement must be reflective in nature, akin to a personal journal entry or a quiet contemplation. It must not be directly addressed to any specific person or entity (i.e., avoid using "you" or similar direct address pronouns). The gratitude is implicitly for the writer's own reflection or for a general, passive audience.
       3. The statement must deliberately omit any explicit phrases that directly state gratitude, such as "I appreciated," "I'm grateful for," "Thank you," "I was thankful for," or similar constructions. The feeling of gratitude should be implied by the positive impact described.
-      4. The statement must describe a specific past action, quality, or situation that was beneficial or positive for the writer. This description should then be followed by a clear articulation of the resulting positive emotion or impact experienced by the writer. The beneficial action/quality should inherently convey why gratitude would be felt. The emotion/impact word should describe the writer's personal feeling or state.
+      4. The statement must describe a specific past action, quality, possession, or situation that was beneficial or positive for the writer. This description should then be followed by a clear articulation of the resulting positive emotion or impact experienced by the writer. The beneficial action/quality should inherently convey why gratitude would be felt. The emotion/impact word should describe the writer's personal feeling or state.
       6. The statement must be clear and concise, avoiding verbose explanations, unnecessary jargon, or repetitive phrasing. Get straight to the point.
       7. The statement must avoid over-accentuating feelings. Use balanced and natural language to describe emotions, steering clear of overly dramatic, intense, or exaggerated emotional descriptors.
 
-    Format your response as a JSON array of three strings, each containing a different statement formed with a warm, positive tone.
+    Format your response as a JSON array of three strings, each containing a different statement formed with a warm, casual and positive tone.
   `
 };
 

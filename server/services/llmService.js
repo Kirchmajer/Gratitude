@@ -273,16 +273,48 @@ class LLMService {
           } catch (parseError) {
             console.error('Error parsing JSON, attempting to extract statements manually:', parseError);
             
-            // If JSON parsing fails, try to extract statements manually
-            // Look for quoted strings that might be statements
+            // If JSON parsing fails, try multiple approaches to extract statements
             const statements = [];
-            const regex = /"([^"]+)"/g;
-            let match;
             
-            while ((match = regex.exec(content)) !== null && statements.length < 3) {
-              if (match[1].length > 10) { // Only consider strings that are long enough to be statements
-                statements.push(match[1]);
+            // Approach 1: Look for quoted strings that might be statements
+            const quoteRegex = /"([^"]+)"/g;
+            let quoteMatch;
+            
+            while ((quoteMatch = quoteRegex.exec(content)) !== null && statements.length < 3) {
+              if (quoteMatch[1].length > 10) { // Only consider strings that are long enough to be statements
+                statements.push(quoteMatch[1]);
               }
+            }
+            
+            // Approach 2: If no quoted strings found, look for numbered lists (1. Statement)
+            if (statements.length === 0) {
+              const numberedRegex = /\d+\.\s*([^.!?]+[.!?])/g;
+              let numberedMatch;
+              
+              while ((numberedMatch = numberedRegex.exec(content)) !== null && statements.length < 3) {
+                if (numberedMatch[1].trim().length > 10) {
+                  statements.push(numberedMatch[1].trim());
+                }
+              }
+            }
+            
+            // Approach 3: If still no statements, look for sentences that might be statements
+            if (statements.length === 0) {
+              // Split by common sentence delimiters and filter out short sentences
+              const sentences = content.split(/[.!?]+/)
+                .map(s => s.trim())
+                .filter(s => s.length > 15 && s.length < 150 && !s.startsWith('```') && !s.includes('statement'));
+              
+              statements.push(...sentences.slice(0, 3));
+            }
+            
+            // Approach 4: If still no statements, try to extract paragraphs
+            if (statements.length === 0) {
+              const paragraphs = content.split('\n\n')
+                .map(p => p.trim())
+                .filter(p => p.length > 20 && p.length < 200 && !p.startsWith('```'));
+              
+              statements.push(...paragraphs.slice(0, 3));
             }
             
             // If we found at least one statement, use those
