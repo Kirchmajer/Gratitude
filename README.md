@@ -77,6 +77,28 @@ The server requires environment variables to be set in a `.env` file in the serv
 
 3. You'll need to obtain an API key from [OpenRouter](https://openrouter.ai/) to use the LLM features.
 
+### API Key Security
+
+⚠️ **IMPORTANT: Never commit your `.env` file to version control!** ⚠️
+
+The `.env` file contains sensitive information, including your API keys. The repository is configured to ignore this file via `.gitignore`, but you should always verify that your API keys and other secrets are not being committed.
+
+If you accidentally commit your API key:
+
+1. Remove the file from Git tracking (without deleting it locally):
+   ```
+   git rm --cached server/.env
+   ```
+
+2. Commit this change:
+   ```
+   git commit -m "Remove .env file with API key"
+   ```
+
+3. Revoke the exposed API key and generate a new one at [OpenRouter](https://openrouter.ai/keys)
+
+4. Update your local `.env` file with the new API key
+
 ## Database Setup
 
 The application uses SQLite for data storage. The database file is automatically created when the server starts for the first time.
