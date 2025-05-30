@@ -127,9 +127,11 @@ class LLMService {
     let status;
     if (missingElements.length === 0 && wordCount >= 5) {
       status = "polished";
-    } else if ((hasBeneficialAction && hasPositiveImpact) || wordCount >= 10) {
+    } else if (hasBeneficialAction && hasPositiveImpact) {
+      // Only classify as "needs_polishing" if both beneficial action and positive impact are present
       status = "needs_polishing";
     } else {
+      // If either beneficial action or positive impact is missing, classify as "needs_more_details"
       status = "needs_more_details";
     }
     
@@ -236,6 +238,7 @@ class LLMService {
         try {
           // Try to extract JSON from the response if it's not already valid JSON
           let jsonStr = content;
+          let result;
           
           // If the response contains a JSON array within markdown code blocks, extract it
           const jsonMatch = content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/);
@@ -265,7 +268,33 @@ class LLMService {
             }
           }
           
-          const result = JSON.parse(jsonStr);
+          try {
+            result = JSON.parse(jsonStr);
+          } catch (parseError) {
+            console.error('Error parsing JSON, attempting to extract statements manually:', parseError);
+            
+            // If JSON parsing fails, try to extract statements manually
+            // Look for quoted strings that might be statements
+            const statements = [];
+            const regex = /"([^"]+)"/g;
+            let match;
+            
+            while ((match = regex.exec(content)) !== null && statements.length < 3) {
+              if (match[1].length > 10) { // Only consider strings that are long enough to be statements
+                statements.push(match[1]);
+              }
+            }
+            
+            // If we found at least one statement, use those
+            if (statements.length > 0) {
+              console.log('Extracted statements manually:', statements);
+              result = statements;
+            } else {
+              // If we couldn't extract statements, fall back to default statements
+              console.warn('Could not extract statements manually, using fallback');
+              return this.getFallbackGratitudeStatements(input);
+            }
+          }
           console.log('Parsed gratitude statements:', result);
           
           // Ensure the result is an array
