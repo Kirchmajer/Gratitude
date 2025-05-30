@@ -6,6 +6,7 @@ dotenv.config();
 // OpenRouter API configuration
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const DEFAULT_MODEL = process.env.LLM_MODEL || 'google/gemini-2.0-flash-exp:free';
 
 // Default headers for OpenRouter
 const headers = {
@@ -14,6 +15,9 @@ const headers = {
   'HTTP-Referer': 'https://gratitude-app.com', // Replace with your actual domain in production
   'X-Title': 'Gratitude App'
 };
+
+// Log the model being used
+console.log(`Using LLM model: ${DEFAULT_MODEL}`);
 
 class LLMService {
   // Analyze if input is complete or just keywords
@@ -45,7 +49,7 @@ class LLMService {
         `;
 
         const response = await axios.post(OPENROUTER_URL, {
-          model: 'google/gemini-2.0-flash-exp:free', // Using the free Gemini model
+          model: DEFAULT_MODEL,
           messages: [{ role: "user", content: prompt }],
           temperature: 0.3,
           max_tokens: 50,
@@ -86,7 +90,7 @@ class LLMService {
 
       try {
         const response = await axios.post(OPENROUTER_URL, {
-          model: 'google/gemini-2.0-flash-exp:free', // Using the free Gemini model
+          model: DEFAULT_MODEL,
           messages: [{ role: "user", content: prompt }],
           temperature: 0.7,
           max_tokens: 250,
@@ -156,7 +160,7 @@ class LLMService {
 
       try {
         const response = await axios.post(OPENROUTER_URL, {
-          model: 'google/gemini-2.0-flash-exp:free', // Using the free Gemini model
+          model: DEFAULT_MODEL,
           messages: [{ role: "user", content: prompt }],
           temperature: 0.7,
           max_tokens: 300,

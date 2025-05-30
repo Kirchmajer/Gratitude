@@ -7,6 +7,7 @@ dotenv.config();
 // OpenRouter API configuration
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const DEFAULT_MODEL = process.env.LLM_MODEL || 'google/gemini-2.0-flash-exp:free';
 
 // Controller for testing OpenRouter API functionality
 class TestController {
@@ -109,7 +110,7 @@ class TestController {
       
       // Make a simple request to verify the API key
       const response = await axios.post(OPENROUTER_URL, {
-        model: 'google/gemini-2.0-flash-exp:free',
+        model: DEFAULT_MODEL,
         messages: [{ role: "user", content: "Hello, this is a test message to verify the API key." }],
         temperature: 0.3,
         max_tokens: 10,
